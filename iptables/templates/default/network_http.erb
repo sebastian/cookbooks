@@ -1,4 +1,0 @@
-# HTTP Locked Down
-<% @node[:iptables][:http][:addresses].each do |address| %>
--A FWR -p tcp -s <%= address %> --dport 80 -j ACCEPT
-<% end %>

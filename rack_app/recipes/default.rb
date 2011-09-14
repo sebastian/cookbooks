@@ -8,10 +8,12 @@
 #
 
 # We rely on nginx/passenger being installed
-include_recipe "passenger::install"
+include_recipe "passenger::daemon"
 
 nginx_path = node[:passenger][:production][:path]
 base_path = node[:rack_app][:base_path]
+
+gems = Array.new
 
 unless node[:rack_app][:apps].empty? then
 	# Create the supporting app structure
@@ -22,9 +24,12 @@ unless node[:rack_app][:apps].empty? then
 	end
 
 	node[:rack_app][:apps].each do |app|
-
+				
 		name = app[:app_name_short]
 		break unless name # We require a name
+		
+		# We find the gems we need to install for this app
+		gems << app[:gems]
 		
 		# Create a folder for the source code of the app
 		directory base_path + name do
@@ -51,4 +56,8 @@ unless node[:rack_app][:apps].empty? then
 		end
 		
 	end
+end
+
+gems.flatten.uniq.each do |gem_name|
+	gem_package gem_name
 end

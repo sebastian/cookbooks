@@ -1,4 +1,0 @@
-# HTTPS Locked Down
-<% @node[:iptables][:https][:addresses].each do |address| %>
--A FWR -p tcp -s <%= address %> --dport 443 -j ACCEPT
-<% end %>

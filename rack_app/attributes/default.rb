@@ -5,7 +5,8 @@
 #   :description => "Describe the purpose of the app",
 #   :port => "PORT",
 #   :ip => "0.0.0.0",
-#   :server_name => "DOMAIN.com" 
+#   :server_name => "DOMAIN.com",
+#   :gems => []
 # }
 default[:rack_app][:apps] = Array.new
 

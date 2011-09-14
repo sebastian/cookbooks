@@ -1,0 +1,4 @@
+# SSH Locked Down
+<% @node[:iptables][:ssh][:addresses].each do |address| %>
+-A FWR -p tcp -s <%= address %> --dport 22 -j ACCEPT
+<% end %>

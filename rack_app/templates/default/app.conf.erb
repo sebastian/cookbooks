@@ -1,7 +1,19 @@
-# Rack app config
+<% if @description then -%>
+#########
+# This is the rack app configuration for <%= @name %>.
+#
+# Description:
+#   <%= @description %>
+#
+#########
+<% else -%>
+# Rack app configuration for <%= @name %>.
+<% end -%>
 server {
   listen <%= @ip %>:<%= @port %>;
+	<% if @server_name then -%>
   server_name <%= @server_name %>;
+	<% end -%>
   root <%= @root %>/public;
   passenger_enabled on;
 }

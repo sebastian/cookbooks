@@ -9,6 +9,8 @@ pid        /var/run/nginx.pid;
 
 events {
   worker_connections  <%= node[:nginx][:worker_connections] %>;
+  accept_mutex on; # "on" if nginx worker_processes > 1 and in our case is two
+	use epoll;
 }
 
 http {

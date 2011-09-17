@@ -12,3 +12,6 @@ after_fork do |server,worker|
   server.listen("<%= @worker_bind_address %>:#{<%= @worker_bind_base_port %> + worker.nr}") rescue nil
   <% end %>
 end
+
+stderr_path "<%= @log_path %>/unicorn.stderr.log"
+stdout_path "<%= @log_path %>/unicorn.stdout.log"

@@ -1,5 +1,7 @@
 define :unicorn_instance, :enable => true do
 
+	puts "############## Got conf_path: #{params[:conf_path]}"
+
   template params[:conf_path] do
     source "unicorn.conf.erb"
     cookbook "unicorn"

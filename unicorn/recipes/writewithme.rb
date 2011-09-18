@@ -6,37 +6,42 @@
 #
 # All rights reserved - Do Not Redistribute
 #
-include_recipe "unicorn"
+include_recipe "nginx"
 
 name = "writewithme"
 app_root = "/webapps/#{name}"
-config_path = "#{app_root}/current/config/unicorn.conf.rb"
-log_path = "#{app_root}/shared/log"
+conf_dir = "#{app_root}/current/config"
+config_path = "#{conf_dir}/unicorn.conf.rb"
+log_dir = "#{app_root}/shared/log"
+pid_dir = "#{app_root}/shared/pids"
+writewithme_pid_path = "#{pid_dir}/unicorn.pid"
+www_sock_path = "/tmp/unicorn/#{name}.sock"
+public_path = "#{app_root}/public"
 
 # Config
 git = "https://sebastian@github.com/sebastian/Write-With-Me.git"
 
 # To make sure we can use bundler to install app gems
 gem_package "bundler"
+gem_package "i18n"
 
-puts "############################### Creating dir: #{app_root}"
 # Create the supporting app structure
-directory app_root do
-  mode 0755
-  action :create
-  recursive true
+[app_root, conf_dir, log_dir, pid_dir].each do |directory|
+	directory directory do
+	  mode 0755
+	  action :create
+	  recursive true
+	end	
 end
 
-puts "############################### Calling unicorn_instance for: #{name}"
 unicorn_instance name do
 	####
 	# Unicorn
-	log_path log_path
+	log_path log_dir
 	conf_path config_path
-	socket_path "/tmp/unicorn/#{name}.sock"
+	socket_path www_sock_path
 	backlog_limit 1
-	timeout node[:unicorn][:timeout]
-	pid_path "#{app_root}/shared/pids/unicorn.pid"
+	pid_path writewithme_pid_path
 	
 	# Workers
 	worker_count 4
@@ -53,27 +58,35 @@ unicorn_instance name do
 	app_root app_root
 	rack_config_path "#{app_root}/config.ru"
 	preload true
-	unicorn_log_path log_path
+	unicorn_log_path log_dir
 	memory_limit 100
 	user "nobody"
 	group "nobody"
-	cpu_limit cpu[:total]
+	cpu_limit 2
+	env "production"
+end
+	
+# Create an nginx configuration
+template "/etc/nginx/sites-available/#{name}.conf" do
+  source "web_app.conf.erb"
+	cookbook "unicorn"
+  owner "root"
+  group "root"
+  mode 0644
+  variables(
+		"port" => 80,
+		"app_name" => "writewithme",
+		"socket_path" => www_sock_path,
+		"server_ip" => "0.0.0.0",
+		"server_port" => 80,
+		"server_name" => "writewithme.kle.io",
+		"static_path" => public_path
+  )
+	notifies :reload, resources(:service => "nginx")
 end
 
-	
-# # Create an nginx configuration
-# template "#{nginx_path}/conf/sites.d/#{name}.conf" do
-#   source "app.conf.erb"
-#   owner "root"
-#   group "root"
-#   mode 0644
-#   variables(
-# 		:description => app[:description],
-#   	:ip => app[:ip],
-# 		:port => app[:port],
-# 		:server_name => app[:server_name],
-# 		:root => base_path + name,
-# 		:name => name
-#   )
-# 	notifies :reload, 'nginx'
-# end
+execute "nxensite #{name}" do
+  command "/usr/sbin/nxensite #{name}.conf"
+  notifies :restart, resources(:service => "nginx")
+  not_if do ::File.symlink?("#{node[:nginx][:dir]}/sites-enabled/#{name}") end
+end

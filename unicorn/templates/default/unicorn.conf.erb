@@ -1,7 +1,7 @@
 worker_processes <%= @worker_count %>
 listen '<%= @socket_path %>', :backlog => <%= @backlog_limit %>
 listen '<%= @master_bind_address %>:<%= @master_bind_port %>'
-timeout <%= @timeout %>
+timeout 15
 pid "<%= @pid_path %>"
 
 <% if @preload %>

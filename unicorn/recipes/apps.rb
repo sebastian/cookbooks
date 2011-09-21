@@ -1,11 +1,8 @@
 counter = 0
 
 node[:active_applications].each do |name, config|
-	puts "################### Looping through active apps. name: #{name}, conf: #{config}"
-
   app_root = "/u/apps/#{name}"
 
-	puts "################### app_root: #{app_root}"
   defaults = Mash.new({
     :pid_path => "#{app_root}/shared/pids/unicorn.pid",
     :worker_count => node[:unicorn][:worker_count],
@@ -27,21 +24,13 @@ node[:active_applications].each do |name, config|
   })
   
   config = defaults.merge(Mash.new(node[:applications][name]))
-  
-	#  	# Added to have it set up the app
-	# unicorn_instance name do
-	# 	conf_path config[:config_path]
-	# 	options config
-	# end
 
-	puts "################### setting up runit_service: unicorn-#{name}"
   runit_service "unicorn-#{name}" do
     template_name "unicorn"
     cookbook "unicorn"
     options config
   end
 
-	puts "################### doing service things for: unicorn-#{name}"    
   service "unicorn-#{name}" do
     action config[:enable] ? [:enable, :start] : [:disable, :stop]
   end

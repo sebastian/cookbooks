@@ -7,3 +7,12 @@ end
 cookbook_file "/usr/local/bin/unicornctl" do
   mode 0755
 end
+
+# Folder for webapps
+directory "/webapps" do
+  mode 0755
+  action :create
+  recursive true
+	owner "admin"
+	group "admin"
+end	

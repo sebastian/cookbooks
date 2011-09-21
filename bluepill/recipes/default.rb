@@ -1,5 +1,5 @@
 gem_package "bluepill" do
-  version node[:bluepill][:version]
+  # version node[:bluepill][:version]
 end
 
 directory node[:bluepill][:config_dir] do
